@@ -28,16 +28,18 @@ on:
     #
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     #
-    # 📝 修改运行时间：只改第一个数字（0-59），表示每小时第几分钟运行
-    # 📝 Change time: Only modify the first number (0-59) = minute of each hour
+    # 📝 A股关键时间点推送（北京时间）：
+    #    9:00（开盘前）、11:30（午间收盘）、14:00（午后开盘）、15:00（收盘）、18:00（晚间汇总）
+    #    UTC时间 = 北京时间 - 8小时，所以：
+    #    9:00 → 1:00、11:30 → 3:30、14:00 → 6:00、15:00 → 7:00、18:00 → 10:00
     #
-    # 示例 / Examples:
-    #   "15 * * * *"     → 每小时第15分钟 / minute 15 every hour
-    #   "30 0-14 * * *"  → 北京时间 8:00-22:00 每小时第30分钟 / Beijing 8am-10pm
-    #
-    - cron: "33 * * * *"
+    - cron: "0 1 * * 1-5"    # 周一到周五 北京时间9:00（开盘前）
+    - cron: "30 3 * * 1-5"   # 周一到周五 北京时间11:30（午间收盘）
+    - cron: "0 6 * * 1-5"    # 周一到周五 北京时间14:00（午后开盘）
+    - cron: "0 7 * * 1-5"    # 周一到周五 北京时间15:00（收盘）
+    - cron: "0 10 * * *"     # 每天 北京时间18:00（晚间汇总）
 
-  workflow_dispatch:
+  workflow_dispatch:  # 保留手动触发，方便测试
 
 concurrency:
   group: crawler-${{ github.ref_name }}
@@ -82,8 +84,8 @@ jobs:
             LIMIT_SECONDS=604800
 
             if [ $DIFF_SECONDS -gt $LIMIT_SECONDS ]; then
-              echo "⚠️ 试用期已结束，请运行 'Check In' 签到续期"
-              echo "⚠️ Trial expired. Run 'Check In' to renew."
+              echo "⚠️  试用期已结束，请运行 'Check In' 签到续期"
+              echo "⚠️  Trial expired. Run 'Check In' to renew."
               gh workflow disable "$WORKFLOW_FILE"
               exit 1
             else
@@ -92,24 +94,6 @@ jobs:
               echo "✅ Trial: ${DAYS_LEFT} days left. Run 'Check In' before expiry to renew."
             fi
           fi
-
-
-      # --------------------------------------------------------------------------------
-      # 🚦 TRAFFIC CONTROL / 流量控制
-      # --------------------------------------------------------------------------------
-      # EN: Generates a random delay between 1 and 300 seconds (5 minutes).
-      #     Critical for load balancing.
-      #
-      # CN: 生成 1 到 300 秒（5分钟）之间的随机延迟。
-      #     这对负载均衡至关重要。
-      # - name: Random Delay (Traffic Control)
-      #   if: success()
-      #   run: |
-      #     echo "🎲 Traffic Control: Generating random delay..."
-      #     DELAY=$(( ( RANDOM % 300 )  + 1 ))
-      #     echo "⏸️  Sleeping for ${DELAY} seconds to spread the load..."
-      #     sleep ${DELAY}s
-      #     echo "▶️  Delay finished. Starting crawler..."
 
       - name: Set up Python
         if: success()
