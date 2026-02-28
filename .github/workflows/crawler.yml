@@ -2,17 +2,17 @@ name: Get Hot News
 
 on:
   schedule:
-    # 提前10分钟设置，规避GitHub Actions定时任务的15分钟内延迟，确保北京时间准点触发
-    - cron: "50 0 * * 1-5"    # 周一到周五 北京时间8:50（开盘前早报）
-    - cron: "20 3 * * 1-5"     # 周一到周五 北京时间11:20（午间收盘汇总）
-    - cron: "50 5 * * 1-5"     # 周一到周五 北京时间13:50（午后开盘前瞻）
-    - cron: "50 6 * * 1-5"     # 周一到周五 北京时间14:50（收盘总结）
-    - cron: "50 9 * * *"       # 每天 北京时间17:50（全天财经汇总）
-  workflow_dispatch:  # 保留手动触发功能
+    # 北京时间准点触发，规避延迟
+    - cron: "50 0 * * 1-5"    # 周一到周五 8:50 开盘早报
+    - cron: "20 3 * * 1-5"     # 周一到周五 11:20 午间汇总
+    - cron: "50 5 * * 1-5"     # 周一到周五 13:50 午后前瞻
+    - cron: "50 6 * * 1-5"     # 周一到周五 14:50 收盘总结
+    - cron: "50 9 * * *"       # 每天 17:50 全天汇总
+  workflow_dispatch:
 
 concurrency:
   group: crawler-${{ github.ref_name }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -50,35 +50,6 @@ jobs:
           
       - name: Run crawler
         env:
-          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          DINGTALK_WEBHOOK_URL: ${{ secrets.DINGTALK_WEBHOOK_URL }}
           WEWORK_WEBHOOK_URL: ${{ secrets.WEWORK_WEBHOOK_URL }}
-          WEWORK_MSG_TYPE: ${{ secrets.WEWORK_MSG_TYPE }}
-          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-          EMAIL_TO: ${{ secrets.EMAIL_TO }}
-          EMAIL_SMTP_SERVER: ${{ secrets.EMAIL_SMTP_SERVER }}
-          EMAIL_SMTP_PORT: ${{ secrets.EMAIL_SMTP_PORT }}
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          NTFY_SERVER_URL: ${{ secrets.NTFY_SERVER_URL }}
-          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
-          BARK_URL: ${{ secrets.BARK_URL }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          # 通用Webhook配置
-          GENERIC_WEBHOOK_URL: ${{ secrets.GENERIC_WEBHOOK_URL }}
-          GENERIC_WEBHOOK_TEMPLATE: ${{ secrets.GENERIC_WEBHOOK_TEMPLATE }}
-          # AI 配置（ai_analysis 和 ai_translation 共享模型配置）
-          AI_ANALYSIS_ENABLED: ${{ secrets.AI_ANALYSIS_ENABLED }}
-          AI_API_KEY: ${{ secrets.AI_API_KEY }}
-          AI_MODEL: ${{ secrets.AI_MODEL }}
-          AI_API_BASE: ${{ secrets.AI_API_BASE }}
-          # 远程存储配置
-          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
-          S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
-          S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
-          S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
-          S3_REGION: ${{ secrets.S3_REGION }}
           GITHUB_ACTIONS: true
         run: python -m trendradar
