@@ -20,22 +20,23 @@ schedule:
   preset: "morning_evening"
 
 # ===============================================================
-# 2. 数据源 - 只保留财经类平台
+# 2. 数据源 - 财经类平台+强制抓取详情摘要
 # ===============================================================
 platforms:
   enabled: true
-  fetch_detail: true  # 【关键开启】抓取新闻详细内容/摘要
+  fetch_detail: true  # 【全局强制开启】抓取所有平台新闻的详情/摘要
   sources:
     - id: "wallstreetcn-hot"
       name: "华尔街见闻"
-      fetch_detail: true
+      fetch_detail: true  # 单独开启该平台详情抓取
+      detail_timeout: 5000
     - id: "cls-hot"
       name: "财联社热门"
-      fetch_detail: true
-    # 其他非财经平台全部删掉
+      fetch_detail: true  # 单独开启该平台详情抓取
+      detail_timeout: 5000
 
 # ===============================================================
-# 3. 数据源 - RSS 订阅（关闭，避免冗余）
+# 3. 数据源 - RSS 订阅（关闭）
 # ===============================================================
 rss:
   enabled: false
@@ -45,29 +46,35 @@ rss:
   feeds: []
 
 # ===============================================================
-# 4. 报告模式（极简排版+摘要显示）
+# 4. 报告模式（强制显示摘要）
 # ===============================================================
 report:
   mode: "current"
-  display_mode: "platform"  # 按平台分组（财联社/华尔街见闻），更清晰
+  display_mode: "platform"
   sort_by_position_first: false
   rank_threshold: 3
-  max_news_per_keyword: 10  # 每个平台最多显示10条，避免刷屏
-  show_detail: true  # 【关键开启】在推送中显示新闻详细摘要
-  detail_max_length: 300  # 摘要最多300字，避免内容过长
+  max_news_per_keyword: 10
+  # 【核心开启】每条新闻显示详细摘要
+  show_detail: true
+  # 摘要最多300字，2-3句话，内容完整不冗长
+  detail_max_length: 300
+  # 摘要显示在标题下方，缩进排版
+  detail_indent: true
+  # 保留新闻发布时间
+  show_publish_time: true
 
 # ===============================================================
-# 5. 推送内容控制（只留核心财经新闻）
+# 5. 推送内容控制
 # ===============================================================
 display:
   region_order:
-    - hotlist  # 只显示财经热榜，其他全部去掉
+    - hotlist
   regions:
     hotlist: true
     new_items: false
     rss: false
     standalone: false
-    ai_analysis: false  # 关闭AI分析，避免报错+简化内容
+    ai_analysis: false
 
   standalone:
     platforms: []
@@ -75,13 +82,13 @@ display:
     max_items: 0
 
 # ===============================================================
-# 6. 推送通知（企业微信配置留空，走GitHub Secrets）
+# 6. 推送通知（企业微信）
 # ===============================================================
 notification:
   enabled: true
   channels:
     wework:
-      enabled: true  # 【关键修复】开启企业微信推送渠道
+      enabled: true
       webhook_url: ""
       msg_type: "markdown"
     # 其他推送渠道全部清空
@@ -111,7 +118,7 @@ notification:
       payload_template: ""
 
 # ===============================================================
-# 7. 存储配置（极简）
+# 7. 存储配置
 # ===============================================================
 storage:
   backend: "auto"
@@ -121,7 +128,7 @@ storage:
     html: false
   local:
     data_dir: "output"
-    retention_days: 7  # 只保留7天数据，避免冗余
+    retention_days: 7
   remote:
     retention_days: 0
     endpoint_url: ""
@@ -134,7 +141,7 @@ storage:
     days: 7
 
 # ===============================================================
-# 8. AI 模型配置（关闭，如需AI生成更精准摘要可开启）
+# 8. AI 模型配置（关闭，如需AI润色摘要可开启）
 # ===============================================================
 ai:
   model: ""
@@ -168,7 +175,7 @@ ai_translation:
   prompt_file: "ai_translation_prompt.txt"
 
 # ===============================================================
-# 11. 高级设置（优化排版）
+# 11. 高级设置
 # ===============================================================
 advanced:
   debug: false
@@ -195,7 +202,7 @@ advanced:
   max_accounts_per_channel: 3
 
   batch_size:
-    default: 3000  # 减小批次大小，避免拆分成多段
+    default: 3000
     dingtalk: 20000
     feishu: 30000
     bark: 4000
