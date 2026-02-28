@@ -76,6 +76,7 @@ notification:
   enabled: true
   channels:
     wework:
+      enabled: true  # 【关键修复】开启企业微信推送渠道
       webhook_url: ""
       msg_type: "markdown"
     # 其他推送渠道全部清空
