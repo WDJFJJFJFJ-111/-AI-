@@ -20,37 +20,33 @@ schedule:
   preset: "morning_evening"
 
 # ===============================================================
-# 2. 数据源 - 强制抓取详情+无缓存
+# 2. 数据源 - 只保留财经类平台
 # ===============================================================
 platforms:
   enabled: true
   fetch_detail: true
-  force_refetch: true  # 【核心】强制每次重新抓取，不用缓存数据
-  detail_only_with_url: false  # 【核心】只要有链接就抓详情，不做过滤
   sources:
     - id: "wallstreetcn-hot"
       name: "华尔街见闻"
-      fetch_detail: true
-      force_refetch: true
-      detail_timeout: 10000
     - id: "cls-hot"
       name: "财联社热门"
-      fetch_detail: true
-      force_refetch: true
-      detail_timeout: 10000
 
 # ===============================================================
-# 3. 数据源 - RSS 订阅（兜底备用，自带摘要）
+# 3. 数据源 - RSS 订阅（兜底，确保有内容）
 # ===============================================================
 rss:
-  enabled: false
+  enabled: true
   freshness_filter:
     enabled: true
     max_age_days: 1
-  feeds: []
+  feeds:
+    - name: "财联社-最新财经"
+      url: "https://www.cls.cn/rss/roll.xml"
+    - name: "华尔街见闻-实时资讯"
+      url: "https://wallstreetcn.com/news/rss"
 
 # ===============================================================
-# 4. 报告模式（强制显示摘要）
+# 4. 报告模式（极简排版+AI摘要）
 # ===============================================================
 report:
   mode: "current"
@@ -58,26 +54,22 @@ report:
   sort_by_position_first: false
   rank_threshold: 3
   max_news_per_keyword: 10
-  # 【强制显示摘要所有开关】
   show_detail: true
   detail_max_length: 300
-  detail_indent: true
-  show_publish_time: true
-  # 【核心】就算摘要为空也显示占位，确认开关是否生效
-  show_empty_detail: true
 
 # ===============================================================
-# 5. 推送内容控制
+# 5. 推送内容控制（显示AI分析+热榜）
 # ===============================================================
 display:
   region_order:
     - hotlist
+    - ai_analysis  # 显示AI生成的摘要区域
   regions:
     hotlist: true
     new_items: false
-    rss: false
+    rss: true
     standalone: false
-    ai_analysis: false
+    ai_analysis: true  # 开启AI分析显示
 
   standalone:
     platforms: []
@@ -85,7 +77,7 @@ display:
     max_items: 0
 
 # ===============================================================
-# 6. 推送通知（企业微信）
+# 6. 推送通知（企业微信配置）
 # ===============================================================
 notification:
   enabled: true
@@ -94,7 +86,7 @@ notification:
       enabled: true
       webhook_url: ""
       msg_type: "markdown"
-    # 其他推送渠道全部清空
+    # 其他渠道清空
     feishu:
       webhook_url: ""
     dingtalk:
@@ -121,7 +113,7 @@ notification:
       payload_template: ""
 
 # ===============================================================
-# 7. 存储配置（强制清缓存，不用旧数据）
+# 7. 存储配置
 # ===============================================================
 storage:
   backend: "auto"
@@ -131,7 +123,7 @@ storage:
     html: false
   local:
     data_dir: "output"
-    retention_days: 1  # 只保留1天数据，每天强制清缓存
+    retention_days: 7
   remote:
     retention_days: 0
     endpoint_url: ""
@@ -141,31 +133,31 @@ storage:
     region: ""
   pull:
     enabled: false
-    days: 1
+    days: 7
 
 # ===============================================================
-# 8. AI 模型配置（关闭）
+# 8. AI 模型配置（DeepSeek API，已填你的密钥）
 # ===============================================================
 ai:
-  model: ""
-  api_key: ""
-  api_base: ""
+  model: "deepseek-chat"  # DeepSeek默认模型
+  api_key: "sk-269ca6e14c774be5ad16d0073f8f0579"  # 你的DeepSeek API Key
+  api_base: "https://api.deepseek.com/v1"  # DeepSeek官方Base URL
   timeout: 120
-  temperature: 1.0
-  max_tokens: 0
-  num_retries: 0
+  temperature: 0.3  # 低温度，摘要更精准、稳定
+  max_tokens: 500  # 每条摘要最多500字
+  num_retries: 2
   fallback_models: []
 
 # ===============================================================
-# 9. AI 分析功能（关闭）
+# 9. AI 分析功能（生成新闻摘要）
 # ===============================================================
 ai_analysis:
-  enabled: false
+  enabled: true  # 开启AI摘要生成
   language: "Chinese"
   prompt_file: "ai_analysis_prompt.txt"
   mode: "follow_report"
-  max_news_for_analysis: 0
-  include_rss: false
+  max_news_for_analysis: 10  # 对前10条新闻生成摘要
+  include_rss: true
   include_standalone: false
   include_rank_timeline: false
 
@@ -181,13 +173,13 @@ ai_translation:
 # 11. 高级设置
 # ===============================================================
 advanced:
-  debug: true  # 开启debug，日志里会显示有没有抓到详情
+  debug: false
   version_check_url: "https://raw.githubusercontent.com/sansan0/TrendRadar/refs/heads/master/version"
   mcp_version_check_url: "https://raw.githubusercontent.com/sansan0/TrendRadar/refs/heads/master/version_mcp"
   configs_version_check_url: "https://raw.githubusercontent.com/sansan0/TrendRadar/refs/heads/master/version_configs"
 
   crawler:
-    request_interval: 3000  # 放慢请求速度，规避反爬
+    request_interval: 2000
     use_proxy: false
     default_proxy: "http://127.0.0.1:10801"
 
