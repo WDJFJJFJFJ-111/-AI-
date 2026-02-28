@@ -20,29 +20,33 @@ schedule:
   preset: "morning_evening"
 
 # ===============================================================
-# 2. 数据源 - 财经类平台+强制抓取详情摘要
+# 2. 数据源 - 强制抓取详情+无缓存
 # ===============================================================
 platforms:
   enabled: true
-  fetch_detail: true  # 【全局强制开启】抓取所有平台新闻的详情/摘要
+  fetch_detail: true
+  force_refetch: true  # 【核心】强制每次重新抓取，不用缓存数据
+  detail_only_with_url: false  # 【核心】只要有链接就抓详情，不做过滤
   sources:
     - id: "wallstreetcn-hot"
       name: "华尔街见闻"
-      fetch_detail: true  # 单独开启该平台详情抓取
-      detail_timeout: 5000
+      fetch_detail: true
+      force_refetch: true
+      detail_timeout: 10000
     - id: "cls-hot"
       name: "财联社热门"
-      fetch_detail: true  # 单独开启该平台详情抓取
-      detail_timeout: 5000
+      fetch_detail: true
+      force_refetch: true
+      detail_timeout: 10000
 
 # ===============================================================
-# 3. 数据源 - RSS 订阅（关闭）
+# 3. 数据源 - RSS 订阅（兜底备用，自带摘要）
 # ===============================================================
 rss:
   enabled: false
   freshness_filter:
     enabled: true
-    max_age_days: 3
+    max_age_days: 1
   feeds: []
 
 # ===============================================================
@@ -54,14 +58,13 @@ report:
   sort_by_position_first: false
   rank_threshold: 3
   max_news_per_keyword: 10
-  # 【核心开启】每条新闻显示详细摘要
+  # 【强制显示摘要所有开关】
   show_detail: true
-  # 摘要最多300字，2-3句话，内容完整不冗长
   detail_max_length: 300
-  # 摘要显示在标题下方，缩进排版
   detail_indent: true
-  # 保留新闻发布时间
   show_publish_time: true
+  # 【核心】就算摘要为空也显示占位，确认开关是否生效
+  show_empty_detail: true
 
 # ===============================================================
 # 5. 推送内容控制
@@ -118,7 +121,7 @@ notification:
       payload_template: ""
 
 # ===============================================================
-# 7. 存储配置
+# 7. 存储配置（强制清缓存，不用旧数据）
 # ===============================================================
 storage:
   backend: "auto"
@@ -128,7 +131,7 @@ storage:
     html: false
   local:
     data_dir: "output"
-    retention_days: 7
+    retention_days: 1  # 只保留1天数据，每天强制清缓存
   remote:
     retention_days: 0
     endpoint_url: ""
@@ -138,10 +141,10 @@ storage:
     region: ""
   pull:
     enabled: false
-    days: 7
+    days: 1
 
 # ===============================================================
-# 8. AI 模型配置（关闭，如需AI润色摘要可开启）
+# 8. AI 模型配置（关闭）
 # ===============================================================
 ai:
   model: ""
@@ -178,13 +181,13 @@ ai_translation:
 # 11. 高级设置
 # ===============================================================
 advanced:
-  debug: false
+  debug: true  # 开启debug，日志里会显示有没有抓到详情
   version_check_url: "https://raw.githubusercontent.com/sansan0/TrendRadar/refs/heads/master/version"
   mcp_version_check_url: "https://raw.githubusercontent.com/sansan0/TrendRadar/refs/heads/master/version_mcp"
   configs_version_check_url: "https://raw.githubusercontent.com/sansan0/TrendRadar/refs/heads/master/version_configs"
 
   crawler:
-    request_interval: 2000
+    request_interval: 3000  # 放慢请求速度，规避反爬
     use_proxy: false
     default_proxy: "http://127.0.0.1:10801"
 
